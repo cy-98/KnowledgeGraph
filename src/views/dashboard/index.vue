@@ -3,13 +3,16 @@
     <svg :width="width" :height="height" @mouseup="dragOver" @click="cancelLink" @mousemove="dragging" :transform="`scale(${scale})`" @mousewheel="zoom">
       <line
         v-for="(path) in pathes" 
+        v-if="!!path"
         :path="path"
         :x1="path.source.x"
         :y1="path.source.y"
         :x2="path.target.x"
         :y2="path.target.y"
-        style="stroke:rgb(0,0,0);stroke-width:2"
+        :data-uuid="path.uuid"
+        style="stroke:rgb(0,0,0);stroke-width:4"
         marker-end="url(#arrow)"
+        @contextmenu.prevent="deleteLink"
       />
       <marker
         id="arrow"
@@ -31,22 +34,23 @@
         style="stroke:#38f;stroke-width:2"
       />
       <circle
-        class="svg-circle"
         v-for="(item) in dataset"
+        class="svg-circle"
         r="25"
         :cx="item.x"
         :cy="item.y"
         :data-index="item.index"
+        :data-uuid="item.uuid"
         fill="#38f"
         @mousedown="dragStart"
         @click="click"
-        @contextmenu.prevent="onContextmenu"
+        @contextmenu.prevent="nodeSetting"
       />
       <text
-        class="svg-text circle-text"
         v-for="(name) in dataset"
         :x="name.x"
         :y="name.y"
+        class="svg-text circle-text"
       >{{ name.name }}</text>
       <text
         v-if="mid.text"
@@ -64,7 +68,7 @@
 // import * as d3 from 'd3'
 import { nodes, ships } from './data'
 import { getSize, getSimulation } from './utild3'
-import { _cancelLink } from './events'
+import { _cancelLink, updatePathes } from './events'
 
 let originX = 0
 let originY = 0
@@ -104,29 +108,15 @@ export default {
   },
   watch: {
     dataset: function() {
-      const pathes = []
-
       const ships = this.ships || ships
       const nodes = this.dataset || nodes
+      this.pathes = updatePathes(ships, nodes)
+    },
 
-      ships.forEach(ship => {
-        const IDsource = ship.source
-        const IDtarget = ship.target
-
-        const source = nodes.find((n) => (n.uuid === IDsource))
-        const target = nodes.find((n) => (n.uuid === IDtarget))
-
-        if (!source || !target) { return } // 任意目标或源节点没有被找到则忽略
-
-        const path = {
-          source: source,
-          target: target
-        }
-        path.text = ship.text ? ship.text : ''
-        pathes.push(path)
-      })
-
-      this.pathes = pathes
+    ships: function() {
+      const ships = this.ships || ships
+      const nodes = this.dataset || nodes
+      this.pathes = updatePathes(ships, nodes)
     }
   },
   mounted() {
@@ -150,9 +140,12 @@ export default {
     this.dataset = simulation.nodes()
   },
   methods: {
-    onContextmenu(event) {
+    nodeSetting(event) {
       this.IsDragging = false
-      const node = this.dataset[event.target.dataset.index]
+      const uuid = event.target.dataset.uuid
+      const index= event.target.dataset.index
+      const node = this.dataset[index]
+
       this.$contextmenu({
         items: [
           {
@@ -162,6 +155,45 @@ export default {
               this.newLink.event = { x: event.offsetX, y: event.offsetY }
               this.newLink.IsLinking = true
             }
+          },
+          {
+            label: '删除节点',
+            onClick: () => {
+              new Promise((resolve, reject) => {
+                this.dataset.splice(index, 1)
+                resolve()
+              }).then(() => {
+                let i = 0
+                this.dataset.forEach(node => {
+                  node.index = i++
+                })
+              })
+              // updateNodes
+            }
+          }
+        ],
+        event,
+        customClass: 'class-b',
+        zIndex: 99,
+        minWidth: 200
+      })
+
+      return false
+    },
+
+    deleteLink(event) {
+      const uuid = event.target.dataset.uuid
+
+      this.$contextmenu({
+        items: [
+          {
+            label: '删除链接',
+            onClick: () => {
+              const link = this.ships.find(l => (l.uuid === uuid))
+              const index = this.ships.indexOf(link)
+              this.ships.splice(index, 1)
+              // deleteships
+            }
           }
         ],
         event,
@@ -169,8 +201,6 @@ export default {
         zIndex: 99,
         minWidth: 200
       })
-
-      return false
     },
 
     click(event) {
