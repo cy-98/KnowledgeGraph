@@ -1,79 +1,48 @@
 <template>
   <div class="dashboard-container">
-    <svg :width="width" :height="height" @mouseup="dragOver" @click="cancelLink" @mousemove="dragging" :transform="`scale(${scale})`" @mousewheel="zoom">
-      <line
-        v-for="(path) in pathes" 
-        v-if="!!path"
-        :path="path"
-        :x1="path.source.x"
-        :y1="path.source.y"
-        :x2="path.target.x"
-        :y2="path.target.y"
-        :data-uuid="path.uuid"
-        style="stroke:rgb(0,0,0);stroke-width:4"
-        marker-end="url(#arrow)"
-        @contextmenu.prevent="deleteLink"
-      />
+    <svg :width="width" :height="height" data-type="svg" @mousemove="Moving" @mouseup="cancelDrag">
       <marker
         id="arrow"
-        refX="20"
+        refX="4"
         refY="3"
-        markerWidth="26"
+        markerWidth="16"
         markerHeight="16"
         fill="#000"
         orient="auto"
       >
-        <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+        <path d="M2,2 L2,5 L6,3 z" fill="#000" />
       </marker>
-      <line
-        v-if="newLink.IsLinking"
-        :x1="newLink.source.x"
-        :y1="newLink.source.y"
-        :x2="newLink.event.x"
-        :y2="newLink.event.y"
-        style="stroke:#38f;stroke-width:2"
-      />
       <circle
-        v-for="(item) in dataset"
-        class="svg-circle"
+        v-for="node in nodes"
+        :key="node.uuid"
         r="25"
-        :cx="item.x"
-        :cy="item.y"
-        :data-index="item.index"
-        :data-uuid="item.uuid"
-        fill="#38f"
-        @mousedown="dragStart"
-        @click="click"
-        @contextmenu.prevent="nodeSetting"
+        :cx="node.x"
+        :cy="node.y"
+        fill="#f38"
+        data-type="circle"
+        :data-uuid="node.uuid"
+        @mousedown="drag"
+        @contextmenu="nodeMenu"
       />
-      <text
-        v-for="(name) in dataset"
-        :x="name.x"
-        :y="name.y"
-        class="svg-text circle-text"
-      >{{ name.name }}</text>
-      <text
-        v-if="mid.text"
-        class="svg-text line-text"
-        v-for="(mid) in pathes"
-        :x="(mid.source.x + mid.target.x) / 2"
-        :y="(mid.source.y + mid.target.y) / 2"
-      >{{ mid.text }}</text>
+      <line
+        v-for="path in ships"
+        :key="path.uuid"
+        :x1="path.source.x"
+        :y1="path.source.y"
+        :x2="path.target.x"
+        :y2="path.target.y"
+        data-type="line"
+        style="stroke:rgb(66,66,66);stroke-width:4"
+        marker-end="url(#arrow)"
+      />
     </svg>
   </div>
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
-// import * as d3 from 'd3'
 import { nodes, ships } from './data'
-import { getSize, getSimulation } from './utild3'
-import { _cancelLink, updatePathes } from './events'
-
-let originX = 0
-let originY = 0
-let deltaX = 0
-let deltaY = 0 // 拖拽位置计算
+import { initSize, initNodes, initNodesMap, initShips } from './init'
+import { dragStart, dragging, dragOver, setNodeMenu } from './methods'
 
 export default {
   name: 'Dashboard',
@@ -81,210 +50,65 @@ export default {
     return {
       width: 0,
       height: 0,
+      nodes: [],
+      ships: [],
+      nodesMap: {},
 
-      // 结点及关系
-      ships, // source 和 target 的关系
-      dataset: [], // 结点关系
-      pathes: [], // svg-line的路径
+      initSize: initSize, // init
+      initNodes: initNodes,
+      initNodesMap: initNodesMap,
+      initShips: initShips,
 
-      // 模型
-      simulation: null,
+      dragStart: dragStart.bind(this), // drag
+      dragging: dragging.bind(this),
+      dragOver: dragOver.bind(this),
 
-      // 拖拽属性
-      dragingNode: null,
-      IsDragging: false,
-
-      // 缩放比例
-      scale: 1,
-
-      // 新建链接
-      newLink: {
-        IsLinking: false,
-        source: null,
-        target: null,
-        event: {}
-      }
-    }
-  },
-  watch: {
-    dataset: function() {
-      const ships = this.ships || ships
-      const nodes = this.dataset || nodes
-      this.pathes = updatePathes(ships, nodes)
-    },
-
-    ships: function() {
-      const ships = this.ships || ships
-      const nodes = this.dataset || nodes
-      this.pathes = updatePathes(ships, nodes)
+      originX: 0,
+      originY: 0,
+      deltaX: 0,
+      deltaY: 0,
+      draggingNode: null
     }
   },
   mounted() {
-    /** init
-     * @width
-     * @height 画布宽高
-     * @simulation  力学模型
-     * @_ships 初始结点关系
-     * @_nodes 初始结点
-     * @pathes 结点路径
-     */
-
-    const { width, height } = getSize() // clientwidth clientheight
-    this.width = width
-    this.height = height
-
-    /** 定义d3结点*/
-    const _charge = true
-    const simulation = getSimulation(nodes, width, height, _charge) // 初始化模型
-    this.simulation = simulation
-    this.dataset = simulation.nodes()
+    this.initSize()
+    this.initNodes(nodes, ships)
+    this.initNodesMap(this.nodes)
+    this.initShips(ships)
   },
-  methods: {
-    nodeSetting(event) {
-      this.IsDragging = false
-      const uuid = event.target.dataset.uuid
-      const index= event.target.dataset.index
-      const node = this.dataset[index]
 
-      this.$contextmenu({
-        items: [
-          {
-            label: '新建链接',
-            onClick: () => {
-              this.newLink.source = node
-              this.newLink.event = { x: event.offsetX, y: event.offsetY }
-              this.newLink.IsLinking = true
-            }
-          },
-          {
-            label: '删除节点',
-            onClick: () => {
-              new Promise((resolve, reject) => {
-                this.dataset.splice(index, 1)
-                resolve()
-              }).then(() => {
-                let i = 0
-                this.dataset.forEach(node => {
-                  node.index = i++
-                })
-              })
-              // updateNodes
-            }
-          }
-        ],
-        event,
-        customClass: 'class-b',
-        zIndex: 99,
-        minWidth: 200
-      })
+  methods: {
+    // -----------drag---------
+    drag(event) {
+      this.dragStart(event)
+    },
+
+    Moving(event) {
+      if (this.draggingNode) {
+        this.dragging(event)
+      }
+    },
+
+    cancelDrag(event) {
+      if (this.draggingNode) { this.dragOver() }
+    },
+    // ------------contextmenu-------
+    nodeMenu(event) {
+      const node = this.nodesMap[event.target.dataset.uuid]
+      const settings = [{
+        label: '新建链接',
+        onClick: () => {
+          console.log(node)
+        }
+      }, {
+        label: '删除节点',
+        onClick: () => {}
+      }]
+
+      setNodeMenu.call(this, event, settings) // 遗留了一个历史问题
 
       return false
-    },
-
-    deleteLink(event) {
-      const uuid = event.target.dataset.uuid
-
-      this.$contextmenu({
-        items: [
-          {
-            label: '删除链接',
-            onClick: () => {
-              const link = this.ships.find(l => (l.uuid === uuid))
-              const index = this.ships.indexOf(link)
-              this.ships.splice(index, 1)
-              // deleteships
-            }
-          }
-        ],
-        event,
-        customClass: 'class-a',
-        zIndex: 99,
-        minWidth: 200
-      })
-    },
-
-    click(event) {
-      if (this.IsDragging) { return false }
-
-      if (this.newLink.IsLinking) {
-        const target = this.dataset[event.target.dataset.index]
-        const source = this.newLink.source
-
-        if (target === source) { // 不能连接自己
-          this.newLink = _cancelLink()
-          console.log(this.newLink)
-          return
-        }
-
-        this.newLink.target = target
-
-        this.ships.push({ // 添加结点关系
-          source: source.uuid,
-          target: target.uuid
-        })
-        this.pathes.push({
-          source: source,
-          target: target
-        })
-
-        this.newLink = _cancelLink()
-      }
-    },
-
-    cancelLink() {
-      this.newLink = _cancelLink()
-    },
-
-    // 拖拽
-    dragStart(e) {
-      if (!this.IsDragging) {
-        this.IsDragging = true
-        originX = e.clientX
-        originY = e.clientY
-        const index = e.target.dataset.index
-        const selectNode = this.dataset[index]
-        this.dragingNode = selectNode
-      }
-    },
-
-    dragging(e) {
-      if (this.IsDragging) {
-        deltaX = e.clientX - originX
-        deltaY = e.clientY - originY
-
-        this.dragingNode.x = this.dragingNode.x + deltaX / this.scale // 放大后：移动的距离要除以放大的比例
-        this.dragingNode.y = this.dragingNode.y + deltaY / this.scale
-
-        originX = e.clientX // 为下一刻的移动更新鼠标偏移量
-        originY = e.clientY
-
-        return
-      }
-
-      if (this.newLink.IsLinking) {
-        this.newLink.event = { x: e.offsetX, y: e.offsetY } // 获取鼠标坐标
-      }
-    },
-
-    dragOver(e) {
-      const charge = false // 不添加相互作用力
-      if (this.dragingNode) {
-        this.dragingNode.fx = null
-        this.dragingNode.fy = null
-      }
-
-      this.dragingNode = null
-      this.IsDragging = false
-
-      this.simulation = getSimulation(this.dataset, this.width, this.height, charge)
-      this.dataset = this.simulation.nodes()
-    },
-
-    // 滚动缩放
-    zoom(e) {
-      this.scale += e.deltaY * 0.008
     }
-
   }
 }
 </script>
