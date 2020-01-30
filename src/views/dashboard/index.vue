@@ -1,6 +1,14 @@
 <template>
   <div class="dashboard-container">
-    <svg :width="width" :height="height" data-type="svg" @mousemove="Moving" @mouseup="cancelDrag">
+    <svg
+      :width="width"
+      :height="height"
+      :transform="`scale(${scale})`"
+      data-type="svg"
+      @mousemove="Moving"
+      @mouseup="cancelDrag"
+      @mousewheel="zoom"
+    >
       <marker
         id="arrow"
         refX="4"
@@ -15,6 +23,7 @@
       <circle
         v-for="node in nodes"
         :key="node.uuid"
+        class="svg-circle"
         r="25"
         :cx="node.x"
         :cy="node.y"
@@ -22,11 +31,20 @@
         data-type="circle"
         :data-uuid="node.uuid"
         @mousedown="drag"
-        @contextmenu="nodeMenu"
+        @contextmenu.prevent="nodeMenu"
       />
+      <text
+        v-for="node in nodes"
+        :key="node.uuid + new Date()"
+        :x="node.x"
+        :y="node.y"
+      >
+        {{ node.text }}
+      </text>
       <line
         v-for="path in ships"
         :key="path.uuid"
+        class="svg-line"
         :x1="path.source.x"
         :y1="path.source.y"
         :x2="path.target.x"
@@ -35,6 +53,14 @@
         style="stroke:rgb(66,66,66);stroke-width:4"
         marker-end="url(#arrow)"
       />
+      <line
+        v-if="isLinking"
+        :x1="linkSource.x"
+        :y1="linkSource.y"
+        :x2="originX"
+        :y2="originY"
+        style="stroke:rgb(66,66,66);stroke-width:4"
+      />
     </svg>
   </div>
 </template>
@@ -42,7 +68,8 @@
 <script>
 import { nodes, ships } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
-import { dragStart, dragging, dragOver, setNodeMenu } from './methods'
+import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, updateShips, movingLink, _zoom, checkThis } from './methods'
+import { getNodes } from './http'
 
 export default {
   name: 'Dashboard',
@@ -59,32 +86,63 @@ export default {
       initNodesMap: initNodesMap,
       initShips: initShips,
 
-      dragStart: dragStart.bind(this), // drag
-      dragging: dragging.bind(this),
-      dragOver: dragOver.bind(this),
+      updateNodesFromMap: updateNodesFromMap,
+      updateShips: updateShips,
 
-      originX: 0,
+      dragStart: dragStart, // drag
+      dragging: dragging,
+      dragOver: dragOver,
+
+      movingLink: movingLink, // link
+      isLinking: false,
+      linkSource: null,
+
+      originX: 0, // mousemove
       originY: 0,
       deltaX: 0,
       deltaY: 0,
-      draggingNode: null
+      draggingNode: null,
+
+      contextmenu: false,
+
+      onZoom: _zoom, // zoom
+      scale: 1,
+
+      checkThis: checkThis // check this of the export function
     }
   },
   mounted() {
+    // getNodes().then(data => {
+    this.checkThis()
     this.initSize()
     this.initNodes(nodes, ships)
     this.initNodesMap(this.nodes)
     this.initShips(ships)
+    // })
   },
 
   methods: {
     // -----------drag---------
     drag(event) {
+      if (this.isLinking) {
+        const node = this.nodesMap[event.target.dataset.uuid]
+        const ship = { source: this.linkSource, target: node }
+
+        this.isLinking = false
+        this.updateShips(this.ships, this.nodesMap, ship)
+
+        return
+      }
+
       this.dragStart(event)
     },
 
     Moving(event) {
-      if (this.draggingNode) {
+      if (this.isLinking) {
+        this.movingLink(event)
+        return
+      }
+      if (this.draggingNode && !this.contextmenu) {
         this.dragging(event)
       }
     },
@@ -92,22 +150,43 @@ export default {
     cancelDrag(event) {
       if (this.draggingNode) { this.dragOver() }
     },
-    // ------------contextmenu-------
+    // --------contextmenu: deletenode  newlink ---------
     nodeMenu(event) {
-      const node = this.nodesMap[event.target.dataset.uuid]
+      this.contextmenu = true
+      this.draggingNode = null
+
+      const uuid = event.target.dataset.uuid
+      const node = this.nodesMap[uuid]
+
       const settings = [{
+
         label: '新建链接',
         onClick: () => {
-          console.log(node)
-        }
-      }, {
+          this.isLinking = true
+          this.linkSource = node
+          this.contextmenu = false
+        } }, {
+
         label: '删除节点',
-        onClick: () => {}
-      }]
+        onClick: () => {
+          delete this.nodesMap[uuid]
+          // updateNodes
+          this.nodes = this.updateNodesFromMap(this.nodesMap)
+          this.ships = this.updateShips(this.ships, this.nodesMap, false)
+          this.contextmenu = false
+        } }, {
+
+        label: '取消',
+        onClick: () => {
+          this.contextmenu = false
+        } }]
 
       setNodeMenu.call(this, event, settings) // 遗留了一个历史问题
-
       return false
+    },
+    // -------------zoom----------
+    zoom(e) {
+      this.onZoom(e)
     }
   }
 }
@@ -125,8 +204,8 @@ export default {
   }
 }
 .svg{
-  &-text{
-    z-index: -1;
+  &-line{
+    z-index: 1;
   }
   &-circle{
     z-index: 99;
