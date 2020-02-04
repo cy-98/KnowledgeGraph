@@ -12,7 +12,7 @@ export function initNodes(nodes, ships) {
     .nodes(nodes)
     .force('link', forceLink(ships).distance(150).id(node => node.uuid))
     .force('center', forceCenter(this.width / 2, this.height / 2))
-    .force('charge', forceManyBody())
+    .force('charge', forceManyBody(0.1))
     .force('collision', forceCollide(25))
 
   this.simulation = simulation

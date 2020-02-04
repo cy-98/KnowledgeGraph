@@ -62,6 +62,7 @@
         style="stroke:rgb(66,66,66);stroke-width:4"
       />
     </svg>
+  <Manager />
   </div>
 </template>
 
@@ -69,10 +70,14 @@
 import { nodes, ships } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
 import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, updateShips, movingLink, _zoom, checkThis } from './methods'
-import { getNodes } from './http'
+// import { getNodes } from './http'
+import Manager from './manager/index.vue'
 
 export default {
   name: 'Dashboard',
+  components: {
+    Manager
+  },
   data() {
     return {
       width: 0,
@@ -112,12 +117,14 @@ export default {
     }
   },
   mounted() {
-    // getNodes().then(data => {
     this.checkThis()
     this.initSize()
     this.initNodes(nodes, ships)
     this.initNodesMap(this.nodes)
     this.initShips(ships)
+    // getNodes().then(res => {
+    //   this.initNodes(res.data.nodes, ships)
+    //   this.initNodesMap(this.nodes)
     // })
   },
 
