@@ -61,13 +61,20 @@ export function updateShips(ships, nodesMap, newship) {
   if (newship) ships.push(newship)
 
   ships.forEach(ship => {
-    if (!nodesMap[ship.source.uuid] || !nodesMap[ship.target.uuid]) {
-      return
-    }
+    if (!nodesMap[ship.source.uuid] || !nodesMap[ship.target.uuid]) { return }
+
     stack.push(ship)
   })
 
   return stack
+}
+
+export function deleteNode(uuid) {
+  console.log(this)
+  delete this.nodesMap[uuid]
+  // updateNodes
+  this.nodes = this.updateNodesFromMap(this.nodesMap)
+  this.ships = this.updateShips(this.ships, this.nodesMap, false)
 }
 // ----------- zoom --------
 export function _zoom(e) {

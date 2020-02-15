@@ -1,6 +1,7 @@
 <template>
   <div class="dashboard-container">
     <svg
+      class="svg"
       :width="width"
       :height="height"
       :transform="`scale(${scale})`"
@@ -62,14 +63,14 @@
         style="stroke:rgb(66,66,66);stroke-width:4"
       />
     </svg>
-  <Manager />
+    <Manager v-if="nodes.length" :nodes="nodes" :ships="ships" :nodes-map="nodesMap" :num="1" @deleteNode="subDelete"/>
   </div>
 </template>
 
 <script>
 import { nodes, ships } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
-import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, updateShips, movingLink, _zoom, checkThis } from './methods'
+import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, deleteNode, updateShips, movingLink, _zoom, checkThis } from './methods'
 // import { getNodes } from './http'
 import Manager from './manager/index.vue'
 
@@ -93,6 +94,7 @@ export default {
 
       updateNodesFromMap: updateNodesFromMap,
       updateShips: updateShips,
+      deleteNode: deleteNode,
 
       dragStart: dragStart, // drag
       dragging: dragging,
@@ -129,6 +131,12 @@ export default {
   },
 
   methods: {
+
+    // subComponent event
+    subDelete(uuid) {
+      console.log('子组件请求删除节点')
+      this.deleteNode(uuid)
+    },
     // -----------drag---------
     drag(event) {
       if (this.isLinking) {
@@ -157,6 +165,7 @@ export default {
     cancelDrag(event) {
       if (this.draggingNode) { this.dragOver() }
     },
+
     // --------contextmenu: deletenode  newlink ---------
     nodeMenu(event) {
       this.contextmenu = true
@@ -176,10 +185,7 @@ export default {
 
         label: '删除节点',
         onClick: () => {
-          delete this.nodesMap[uuid]
-          // updateNodes
-          this.nodes = this.updateNodesFromMap(this.nodesMap)
-          this.ships = this.updateShips(this.ships, this.nodesMap, false)
+          this.deleteNode(uuid)
           this.contextmenu = false
         } }, {
 
@@ -191,6 +197,7 @@ export default {
       setNodeMenu.call(this, event, settings) // 遗留了一个历史问题
       return false
     },
+
     // -------------zoom----------
     zoom(e) {
       this.onZoom(e)
@@ -204,6 +211,7 @@ export default {
   &-container {
     overflow: visible;
     -webkit-user-select: none;
+    display: flex;
   }
   &-text {
     font-size: 30px;
@@ -211,6 +219,7 @@ export default {
   }
 }
 .svg{
+  z-index: 2;
   &-line{
     z-index: 1;
   }

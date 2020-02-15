@@ -3,7 +3,7 @@ import { forceSimulation, forceLink, forceCenter, forceManyBody, forceCollide } 
 
 export function initSize() {
   const appMain = document.getElementsByClassName('app-main')[0]
-  this.width = appMain.clientWidth
+  this.width = appMain.clientWidth - 200
   this.height = appMain.clientHeight
 }
 
@@ -20,6 +20,7 @@ export function initNodes(nodes, ships) {
 
   return
 }
+
 export function initNodesMap(nodes) {
   nodes.forEach(node => {
     this.nodesMap[node.uuid] = node
