@@ -11,6 +11,7 @@
       text-color="#fff"
       active-text-color="#ffd04b"
     >
+
       <!-- 结点 -->
       <el-submenu type="nodes" index="1">
         <template slot="title">
@@ -25,7 +26,27 @@
           {{ node.text }}
         </el-menu-item>
       </el-submenu>
+
       <!-- 关系 -->
+
+      <!-- <el-submenu type="nodes" index="2">
+        <template slot="title">
+          <i class="=el-icon-location" /> 添加关系
+        </template>
+        <el-menu-item>
+          <div class="menu-wrapper">
+            <input v-model="source" class="shipInput source" type="text">
+            ->
+            <input v-model="target" class="shipInput target" type="text">
+          </div>
+        </el-menu-item>
+        <el-menu-item>
+          <div class="btn-wrapper">
+            <button>确定</button>
+          </div>
+        </el-menu-item>
+      </el-submenu> -->
+
     </el-menu>
   </el-aside>
 </template>
@@ -43,7 +64,10 @@ export default {
       shipsList: this.$parent.ships,
       Map: this.$parent.nodesMap,
 
-      ReStr: ''
+      ReStr: '',
+
+      target: null,
+      source: null
     }
   },
   computed: {
@@ -147,5 +171,14 @@ function filNode(list, re) {
   left: 10px;
 
   transform: rotateZ(45deg);
+}
+
+.menu-wrapper {
+  padding: 2px;
+
+  width:100%;
+}
+.shipInput {
+  width: 40px;
 }
 </style>

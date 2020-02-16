@@ -40,11 +40,13 @@ export function setNodeMenu(event, settings) {
   })
   return false
 }
+
 // -------------- newlink ---------------------
 export function movingLink(e) {
   this.originX = e.offsetX
   this.originY = e.offsetY
 }
+
 // -------------- update dependence ------------
 export function updateNodesFromMap(map) {
   const stack = []
@@ -75,7 +77,10 @@ export function deleteNode(uuid) {
   // updateNodes
   this.nodes = this.updateNodesFromMap(this.nodesMap)
   this.ships = this.updateShips(this.ships, this.nodesMap, false)
+  // network end
+  this.openTip('删除成功')
 }
+
 // ----------- zoom --------
 export function _zoom(e) {
   const scale = this.scale

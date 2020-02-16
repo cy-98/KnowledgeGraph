@@ -119,6 +119,7 @@ export default {
     }
   },
   mounted() {
+    // this.$loading({ target: '.dashboard-container' })
     this.checkThis()
     this.initSize()
     this.initNodes(nodes, ships)
@@ -128,17 +129,29 @@ export default {
     //   this.initNodes(res.data.nodes, ships)
     //   this.initNodesMap(this.nodes)
     // })
+    // this.cancelLoading
   },
 
   methods: {
+    // tips
+    openTip(title, type = 'success') {
+      const h = this.$createElement
+
+      this.$notify({
+        title: title,
+        message: h('i', { style: 'color: teal' }),
+        type: type
+      })
+    },
 
     // subComponent event
     subDelete(uuid) {
-      console.log('子组件请求删除节点')
       this.deleteNode(uuid)
     },
+
     // -----------drag---------
     drag(event) {
+      // handle link
       if (this.isLinking) {
         const node = this.nodesMap[event.target.dataset.uuid]
         const ship = { source: this.linkSource, target: node }
@@ -146,9 +159,12 @@ export default {
         this.isLinking = false
         this.updateShips(this.ships, this.nodesMap, ship)
 
+        // network end
+        this.openTip('新建成功')
+
         return
       }
-
+      // drag
       this.dragStart(event)
     },
 
@@ -187,6 +203,10 @@ export default {
         onClick: () => {
           this.deleteNode(uuid)
           this.contextmenu = false
+        } }, {
+        label: '查看信息',
+        onClick: () => {
+          console.log(node)
         } }, {
 
         label: '取消',
