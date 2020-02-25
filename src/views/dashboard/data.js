@@ -12,8 +12,16 @@ export const nodes = [
     uuid: 3
   },
   {
-    text: '远爷太强了',
-    uuid: 18
+    text: '矿业开采',
+    uuid: 4
+  },
+  {
+    text: '煤炭防治',
+    uuid: 7
+  },
+  {
+    text: '瓦斯防治',
+    uuid: 9
   }
 ]
 

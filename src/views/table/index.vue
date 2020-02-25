@@ -1,79 +1,52 @@
 <template>
   <div class="app-container">
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column align="center" label="ID" width="95">
-        <template slot-scope="scope">
-          {{ scope.$index }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Title">
-        <template slot-scope="scope">
-          {{ scope.row.title }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Author" width="110" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Pageviews" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.pageviews }}
-        </template>
-      </el-table-column>
-      <el-table-column class-name="status-col" label="Status" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" prop="created_at" label="Display_time" width="200">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.display_time }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
+    <search />
+    <board />
   </div>
 </template>
-
 <script>
-import { getList } from '@/api/table'
-
+import search from './search'
+import board from '../dashboard/index'
 export default {
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
+  components: {
+    search,
+    board
   },
+  filters: {},
   data() {
     return {
-      list: null,
-      listLoading: true
+      searchMode: 'curiosity',
+      filterText: '',
+      nodesList: [
+        {
+          uuid: 20,
+          name: '煤炭防治',
+          msg: ''
+        },
+        {
+          uuid: 18,
+          name: '瓦斯防治',
+          msg: ''
+        }
+      ]
     }
   },
-  created() {
-    this.fetchData()
-  },
+  created() {},
   methods: {
-    fetchData() {
-      this.listLoading = true
-      getList().then(response => {
-        this.list = response.data.items
-        this.listLoading = false
-      })
+    preSearch(e) {
+      console.log(e)
     }
   }
 }
 </script>
+<style>
+.el-button + .el-button {
+  margin: 0;
+}
+.tags-wp {
+  margin: 15px 0px;
+}
+.etag {
+  margin: 0 5px;
+}
+</style>

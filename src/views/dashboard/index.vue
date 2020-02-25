@@ -8,7 +8,7 @@
       data-type="svg"
       @mousemove="Moving"
       @mouseup="cancelDrag"
-      @mousewheel="zoom"
+      @mousewheel.prevent="zoom"
     >
       <marker
         id="arrow"
@@ -28,7 +28,7 @@
         r="25"
         :cx="node.x"
         :cy="node.y"
-        fill="#f38"
+        fill="#38f"
         data-type="circle"
         :data-uuid="node.uuid"
         @mousedown="drag"
@@ -63,7 +63,6 @@
         style="stroke:rgb(66,66,66);stroke-width:4"
       />
     </svg>
-    <Manager v-if="nodes.length" :nodes="nodes" :ships="ships" :nodes-map="nodesMap" :num="1" @deleteNode="subDelete"/>
   </div>
 </template>
 
@@ -72,12 +71,11 @@ import { nodes, ships } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
 import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, deleteNode, updateShips, movingLink, _zoom, checkThis } from './methods'
 // import { getNodes } from './http'
-import Manager from './manager/index.vue'
 
 export default {
   name: 'Dashboard',
   components: {
-    Manager
+
   },
   data() {
     return {
@@ -221,6 +219,7 @@ export default {
     // -------------zoom----------
     zoom(e) {
       this.onZoom(e)
+      return false
     }
   }
 }
