@@ -11,7 +11,7 @@
 D3负责计算数据
 
 VUE负责渲染
-![img](../public/scan.png)
+![img](https://github.com/CaiyueDamowang/KnowledgeGraph/blob/master/public/scan.png)
 ## Build Setup
 
 
