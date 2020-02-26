@@ -40,7 +40,7 @@
         :x="node.x"
         :y="node.y"
       >
-        {{ node.text }}
+        {{ node.word }}
       </text>
       <line
         v-for="path in ships"
@@ -67,13 +67,12 @@
 </template>
 
 <script>
-import { nodes, ships } from './data'
+import { getAllGraph, ships } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
 import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, deleteNode, updateShips, movingLink, _zoom, checkThis } from './methods'
 // import { getNodes } from './http'
 
 export default {
-  name: 'Dashboard',
   components: {
 
   },
@@ -117,12 +116,20 @@ export default {
     }
   },
   mounted() {
+    (async() => {
+      const nodes = (await getAllGraph()).data.node
+      this.initSize()
+      this.initNodes(nodes, ships)
+      this.initNodesMap(this.nodes)
+      this.initShips(ships)
+    })()
     // this.$loading({ target: '.dashboard-container' })
-    this.checkThis()
-    this.initSize()
-    this.initNodes(nodes, ships)
-    this.initNodesMap(this.nodes)
-    this.initShips(ships)
+    // this.checkThis()
+    // this.initSize()
+    // this.initNodes(getAllGraph, ships)
+    // this.initNodesMap(this.nodes)
+    // this.initShips(ships)
+
     // getNodes().then(res => {
     //   this.initNodes(res.data.nodes, ships)
     //   this.initNodesMap(this.nodes)
@@ -140,11 +147,6 @@ export default {
         message: h('i', { style: 'color: teal' }),
         type: type
       })
-    },
-
-    // subComponent event
-    subDelete(uuid) {
-      this.deleteNode(uuid)
     },
 
     // -----------drag---------

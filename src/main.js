@@ -16,6 +16,13 @@ import '@/icons' // icon
 import '@/permission' // permission control
 
 import Contextmenu from 'vue-contextmenujs'
+
+Vue.use(Contextmenu)
+
+import axios from 'axios'
+
+Vue.prototype.$axios = axios
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -28,9 +35,6 @@ import { mockXHR } from '../mock'
 if (process.env.NODE_ENV === 'development') {
   mockXHR()
 }
-
-// 右键菜单
-Vue.use(Contextmenu)
 
 // set ElementUI lang to EN
 Vue.use(ElementUI, { locale })

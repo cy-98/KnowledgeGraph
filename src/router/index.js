@@ -48,28 +48,21 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/dashboard',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
+      path: '/dashboard',
+      name: 'Graph',
       // component: () => import('@/views/dashboard/index'),
       component: () => import('@/views/table/index'),
-      meta: { title: 'Search', icon: 'dashboard' }
+      meta: { title: 'Graph', icon: 'dashboard' }
     }]
   },
 
   {
-    path: '/example',
+    path: '/table',
     component: Layout,
     redirect: '/example/table',
     name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    meta: { title: 'Table', icon: 'example' },
     children: [
-      {
-        path: 'table',
-        name: 'Table',
-        // component: () => import('@/views/table/index'),
-        component: () => import('@/views/dashboard/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
       {
         path: 'tree',
         name: 'Tree',
@@ -87,7 +80,7 @@ export const constantRoutes = [
         path: 'index',
         name: 'Form',
         component: () => import('@/views/form/index'),
-        meta: { title: '问答句查询', icon: 'form' }
+        meta: { title: 'Search', icon: 'form' }
       }
     ]
   },
@@ -149,18 +142,6 @@ export const constantRoutes = [
       }
     ]
   },
-
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
-  },
-
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]

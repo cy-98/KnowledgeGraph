@@ -1,37 +1,28 @@
 <template>
   <div class="app-container">
     <search />
-    <board />
+    <normal />
   </div>
 </template>
 <script>
 import search from './search'
-import board from '../dashboard/index'
+import normal from '../dashboard/normal'
+
 export default {
   components: {
     search,
-    board
+    normal
   },
   filters: {},
   data() {
     return {
       searchMode: 'curiosity',
-      filterText: '',
-      nodesList: [
-        {
-          uuid: 20,
-          name: '煤炭防治',
-          msg: ''
-        },
-        {
-          uuid: 18,
-          name: '瓦斯防治',
-          msg: ''
-        }
-      ]
+      filterText: ''
     }
   },
-  created() {},
+  created() {
+
+  },
   methods: {
     preSearch(e) {
       console.log(e)
@@ -46,7 +37,5 @@ export default {
 .tags-wp {
   margin: 15px 0px;
 }
-.etag {
-  margin: 0 5px;
-}
+
 </style>

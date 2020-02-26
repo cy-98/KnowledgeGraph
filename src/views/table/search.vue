@@ -6,22 +6,25 @@
         placeholder="please input keyword"
         style="margin-bottom:30px;"
       />
-      <el-button type="primary" icon="el-icon-search" @click="searchNode">搜索</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
     </div>
+
     <div>
       <el-radio v-model="searchMode" label="curiosity" border>Curiosity</el-radio>
       <el-radio v-model="searchMode" label="normal" border>Normal</el-radio>
     </div>
-    <result :node-list="nodesList" @putSearch="preSearch" />
+
+    <el-tag v-for="node in nodesList" :key="node.uuid" class="etag" :data-word="node.word"  @click="putIn">{{ node.word }}</el-tag>
+
   </div>
 </template>
 
 <script>
-import result from './result'
+import { getAllGraph } from '../../api/http'
 
 export default {
   components: {
-    result
+
   },
   filters: {},
   data() {
@@ -29,39 +32,20 @@ export default {
       searchMode: 'curiosity',
       filterText: '',
       nodesList: [
-        {
-          uuid: 20,
-          name: '矿山大数据',
-          msg: ''
-        },
-        {
-          uuid: 9,
-          name: '智能煤炭',
-          msg: ''
-        },
-        {
-          uuid: 33,
-          name: '矿业开采',
-          msg: ''
-        },
-        {
-          uuid: 11,
-          name: '煤炭防治',
-          msg: ''
-        },
-        {
-          uuid: 18,
-          name: '瓦斯防治',
-          msg: ''
-        }
       ]
     }
   },
-  created() {},
+  mounted() {
+    getAllGraph().then(res => {
+      this.nodesList = res.data.node
+    })
+  },
   methods: {
-    searchNode: () => {},
-    preSearch: function(e) {
-      this.filterText = e
+    putIn: function(e) {
+      this.filterText = e.target.dataset.word
+    },
+    search: function() {
+      // axios
     }
   }
 }
@@ -74,6 +58,6 @@ export default {
   margin: 15px 0px;
 }
 .etag {
-  margin: 0 5px;
+  margin: 10px 5px;
 }
 </style>
