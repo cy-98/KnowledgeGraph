@@ -10,7 +10,7 @@ export function initSize() {
 export function initNodes(nodes, ships) {
   const simulation = forceSimulation()
     .nodes(nodes)
-    .force('link', forceLink(ships).distance(150).id(node => node.uuid))
+    .force('link', forceLink(ships).distance(150).id(node => node.index))
     .force('center', forceCenter(this.width / 2, this.height / 2))
     .force('charge', forceManyBody(0.1))
     .force('collision', forceCollide(25))

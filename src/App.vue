@@ -9,3 +9,11 @@ export default {
   name: 'App'
 }
 </script>
+
+<style>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 50px);
+}
+</style>

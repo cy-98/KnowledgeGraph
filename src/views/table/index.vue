@@ -1,17 +1,20 @@
 <template>
   <div class="app-container">
     <search />
-    <normal />
+    <!-- <normal /> -->
+    <curiosity />
   </div>
 </template>
 <script>
 import search from './search'
-import normal from '../dashboard/normal'
+// import normal from '../dashboard/normal'
+import curiosity from '../dashboard/curiosity'
 
 export default {
   components: {
     search,
-    normal
+    curiosity
+    // normal
   },
   filters: {},
   data() {

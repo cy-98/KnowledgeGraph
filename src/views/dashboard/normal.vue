@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { getAllGraph, ships } from './data'
+import { getAllGraph } from './data'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
 import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, deleteNode, updateShips, movingLink, _zoom, checkThis } from './methods'
 // import { getNodes } from './http'
@@ -117,11 +117,11 @@ export default {
   },
   mounted() {
     (async() => {
-      const nodes = (await getAllGraph()).data.node
+      const { node, relationship } = (await getAllGraph()).data
       this.initSize()
-      this.initNodes(nodes, ships)
+      this.initNodes(node, relationship)
       this.initNodesMap(this.nodes)
-      this.initShips(ships)
+      this.initShips(relationship)
     })()
     // this.$loading({ target: '.dashboard-container' })
     // this.checkThis()

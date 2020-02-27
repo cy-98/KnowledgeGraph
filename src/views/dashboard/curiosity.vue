@@ -1,40 +1,107 @@
 <template>
   <div class="dashboard-container">
-    <svg
-      class="svg"
-
-      data-type="svg"
-    >
-      <circle
-        v-for="node in nodes"
-        :key="node.uuid"
-        class="svg-circle"
-        :r="Math.random()*25"
-        :cx="node.x"
-        :cy="node.y"
-        fill="#38f"
-        data-type="circle"
-        :data-uuid="node.uuid"
-        @mousedown="drag"
-        @contextmenu.prevent="nodeMenu"
-      />
-      <line
-        v-for="path in ships"
-        :key="path.uuid"
+    <svg class="cur-svg">
+       <line
+        v-if="otherShips.length"
         class="svg-line"
+        v-for="path in otherShips"
         :x1="path.source.x"
         :y1="path.source.y"
         :x2="path.target.x"
         :y2="path.target.y"
-        data-type="line"
-        style="stroke:rgb(66,66,66);stroke-width:4"
+        style="stroke:rgb(66,66,66);stroke-width:2"
       />
+      <circle
+        class="svg-circle"
+        v-if="currentNode"
+        :currentNode="currentNode"
+        :cx="currentNode.x"
+        :cy="currentNode.y"
+        r="40"
+        fill="#3f8"
+      />
+      <circle
+        class="svg-circle"
+        v-for="node in otherNodes"
+        :key="node.index"
+        :cx="node.x"
+        :cy="node.y"
+        :r="40 - node.degree * 7"
+        :fill="`#${38 + node.degree * 20}f`"
+      />
+      <text v-for="node in nodes" :key="node.index" :x="node.x" :y="node.y">{{ node.word }}</text>
     </svg>
   </div>
 </template>
 
 <script>
-export default {
+import data from '../../api/normal_nodes'
+import { initNodes } from './init'
 
+export default {
+  data() {
+    return {
+      width: 0,
+      height: 0,
+      nodes: [],
+      ships: [],
+      currentNode: null,
+
+      otherNodes: [],
+      otherShips: []
+    }
+  },
+  mounted() {
+    this.width = document.querySelector('.dashboard-container').clientWidth
+    this.height = document.querySelector('.dashboard-container').clientHeight
+
+    const { node, relationship } = data.data
+
+    initNodes.call(this, node, relationship)
+
+    this.nodes = node
+    this.ships = relationship
+
+    this.currentNode = this.nodes[1] // 索引结点
+    let degree = 1
+    recFind.call(this, this.currentNode, this.ships)
+
+    function recFind(currentNode, ships) {
+      const newShips = []
+      const newNodes = []
+      degree++
+      ships.forEach(s => {
+        if (s.source.index === currentNode.index) {
+          s.target.degree = degree
+          newNodes.push(s.target)
+          this.otherNodes.push(s.target)
+
+          newShips.push(s)
+          this.otherShips.push(s)
+        }
+      })
+
+      newNodes.forEach(n => {
+        recFind.call(this, n, ships)
+      })
+    }
+  }
 }
 </script>
+
+<style>
+.dashboard-container {
+  display: flex;
+  flex: 1;
+}
+.cur-svg {
+  flex: 1;
+}
+.svg-circle{
+  z-index: 99;
+}
+.svg-line {
+  z-index: 1;
+}
+</style>
+
