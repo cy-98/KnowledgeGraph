@@ -1,25 +1,26 @@
 <template>
   <div class="app-container">
-    <search />
-    <!-- <normal /> -->
-    <curiosity />
+    <search on:getGraph="viewGraph"/>
+    <Card></Card>
   </div>
 </template>
 <script>
 import search from './search'
+import Card from './card'
 // import normal from '../dashboard/normal'
-import curiosity from '../dashboard/curiosity'
+// import curiosity from '../dashboard/curiosity'
 
 export default {
   components: {
     search,
-    curiosity
+    Card
+    // curiosity
     // normal
   },
   filters: {},
   data() {
     return {
-      searchMode: 'curiosity',
+      searchMode: '',
       filterText: ''
     }
   },
@@ -27,8 +28,8 @@ export default {
 
   },
   methods: {
-    preSearch(e) {
-      console.log(e)
+    viewGrapth(e) {
+      this.searchMode = e
     }
   }
 }

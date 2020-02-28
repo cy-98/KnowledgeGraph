@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-container">
-    <svg class="cur-svg">
-       <line
-        v-if="otherShips.length"
-        class="svg-line"
+    <svg class="cur-svg" :width="width" :height="height">
+      <line
         v-for="path in otherShips"
+        :key="path.word"
+        class="svg-line"
         :x1="path.source.x"
         :y1="path.source.y"
         :x2="path.target.x"
@@ -12,18 +12,18 @@
         style="stroke:rgb(66,66,66);stroke-width:2"
       />
       <circle
-        class="svg-circle"
         v-if="currentNode"
         :currentNode="currentNode"
+        class="svg-circle"
         :cx="currentNode.x"
         :cy="currentNode.y"
         r="40"
         fill="#3f8"
       />
       <circle
-        class="svg-circle"
         v-for="node in otherNodes"
-        :key="node.index"
+        :key="node.word"
+        class="svg-circle"
         :cx="node.x"
         :cy="node.y"
         :r="40 - node.degree * 7"
@@ -52,12 +52,13 @@ export default {
     }
   },
   mounted() {
-    this.width = document.querySelector('.dashboard-container').clientWidth
-    this.height = document.querySelector('.dashboard-container').clientHeight
+    this.width = document.querySelector('.app-main').clientWidth
+    this.height = document.querySelector('.app-main').clientHeight
 
     const { node, relationship } = data.data
 
     initNodes.call(this, node, relationship)
+    this.$store.commit('updateNodes', node)
 
     this.nodes = node
     this.ships = relationship

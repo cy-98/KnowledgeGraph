@@ -9,7 +9,7 @@
       <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
     </div>
 
-    <div>
+    <div @click="toGraph">
       <el-radio v-model="searchMode" label="curiosity" border>Curiosity</el-radio>
       <el-radio v-model="searchMode" label="normal" border>Normal</el-radio>
     </div>
@@ -21,11 +21,9 @@
 
 <script>
 import { getAllGraph } from '../../api/http'
+import { mapActions } from 'vuex'
 
 export default {
-  components: {
-
-  },
   filters: {},
   data() {
     return {
@@ -37,6 +35,7 @@ export default {
   },
   mounted() {
     getAllGraph().then(res => {
+      this.$store.commit('updateNodes', res.data.node)
       this.nodesList = res.data.node
     })
   },
@@ -45,8 +44,26 @@ export default {
       this.filterText = e.target.dataset.word
     },
     search: function() {
-      // axios
-    }
+      if ((this.filterText).trim() === '') return
+
+      this.updateCard({
+        word: this.filterText,
+        subject: '科目',
+        abstract: '简介',
+        interLink: '链接'
+      })
+    },
+    toGraph() {
+      this.changeMode(this.searchMode).then(
+        () => {
+          this.$router.push({ path: `/table/${this.searchMode}` })
+        }
+      )
+    },
+    ...mapActions([
+      'updateCard',
+      'changeMode'
+    ])
   }
 }
 </script>

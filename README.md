@@ -11,7 +11,10 @@
 D3负责计算数据
 
 VUE负责渲染
-![img](https://github.com/CaiyueDamowang/KnowledgeGraph/blob/master/public/scan.png)
+![img](https://github.com/CaiyueDamowang/KnowledgeGraph/blob/master/public/index.png)
+![img](https://github.com/CaiyueDamowang/KnowledgeGraph/blob/master/public/graph.png)
+
+
 ## Build Setup
 
 

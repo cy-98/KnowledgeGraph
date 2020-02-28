@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: '/dashboard',
       name: 'Graph',
       // component: () => import('@/views/dashboard/index'),
-      component: () => import('@/views/table/index'),
+      component: () => import('@/views/dashboard/index'),
       meta: { title: 'Graph', icon: 'dashboard' }
     }]
   },
@@ -59,15 +59,20 @@ export const constantRoutes = [
   {
     path: '/table',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
+    name: 'Table',
     meta: { title: 'Table', icon: 'example' },
     children: [
       {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'normal',
+        name: 'nomal',
+        component: () => import('@/views/Graph/normal.vue'),
+        meta: { title: 'normalGraph', icon: 'tree' }
+      },
+      {
+        path: 'curiosity',
+        name: 'curiosity',
+        component: () => import('@/views/Graph/curiosity.vue'),
+        meta: { title: 'curiosityGraph', icon: 'tree' }
       }
     ]
   },
