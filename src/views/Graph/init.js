@@ -15,10 +15,10 @@ export function initNodes(nodes, ships) {
     .force('charge', forceManyBody(0.1))
     .force('collision', forceCollide(25))
 
-  this.simulation = simulation
-  this.nodes = simulation.nodes()
+  // this.simulation = simulation
+  // this.nodes = simulation.nodes()
 
-  return
+  return simulation
 }
 
 export function initNodesMap(nodes) {

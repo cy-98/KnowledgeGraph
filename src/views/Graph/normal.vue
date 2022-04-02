@@ -21,30 +21,9 @@
       >
         <path d="M2,2 L2,5 L6,3 z" fill="#000" />
       </marker>
-      <circle
-        v-for="node in nodes"
-        :key="node.uuid"
-        class="svg-circle"
-        r="25"
-        :cx="node.x"
-        :cy="node.y"
-        fill="#38f"
-        data-type="circle"
-        :data-uuid="node.uuid"
-        @mousedown="drag"
-        @contextmenu.prevent="nodeMenu"
-      />
-      <text
-        v-for="node in nodes"
-        :key="node.uuid + new Date()"
-        :x="node.x"
-        :y="node.y"
-      >
-        {{ node.word }}
-      </text>
       <line
         v-for="path in ships"
-        :key="path.uuid"
+        :key="path.index"
         class="svg-line"
         :x1="path.source.x"
         :y1="path.source.y"
@@ -62,12 +41,26 @@
         :y2="originY"
         style="stroke:rgb(66,66,66);stroke-width:4"
       />
+      <circle
+        v-for="node in nodes"
+        :key="Math.random() * Math.random()"
+        class="svg-circle"
+        r="25"
+        :cx="node.x"
+        :cy="node.y"
+        fill="#38f"
+        data-type="circle"
+        :data-uuid="node.uuid"
+        @mousedown="drag"
+        @contextmenu.prevent="nodeMenu"
+      />
+      <text v-for="node in nodes" :key="Math.random() * Math.random()" :x="node.x" :y="node.y">{{ node.word }}</text>
     </svg>
   </div>
 </template>
 
 <script>
-import { getAllGraph } from './data'
+import data from '../../api/normal_nodes'
 import { initSize, initNodes, initNodesMap, initShips } from './init'
 import { dragStart, dragging, dragOver, setNodeMenu, updateNodesFromMap, deleteNode, updateShips, movingLink, _zoom, checkThis } from './methods'
 // import { getNodes } from './http'
@@ -116,13 +109,14 @@ export default {
     }
   },
   mounted() {
-    (async() => {
-      const { node, relationship } = (await getAllGraph()).data
-      this.initSize()
-      this.initNodes(node, relationship)
-      this.initNodesMap(this.nodes)
-      this.initShips(relationship)
-    })()
+    const { nodes, ships } = data.data
+    console.log(nodes, ships)
+    this.initSize()
+    this.initNodes(nodes, ships)
+    this.nodes = nodes
+    this.initNodesMap(this.nodes)
+    this.initShips(ships)
+
     // this.$loading({ target: '.dashboard-container' })
     // this.checkThis()
     // this.initSize()

@@ -2,8 +2,10 @@
 
 // ------------- drag-begin ------------
 export function dragStart(e) {
-  const uuid = event.target.dataset.uuid
+  console.log(e.target.dataset)
+  const uuid = e.target.dataset.uuid
   const node = this.nodesMap[uuid]
+  console.log(node, this.nodesMap, uuid)
   this.draggingNode = node
   this.originX = e.clientX
   this.originY = e.clientY

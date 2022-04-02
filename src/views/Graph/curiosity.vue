@@ -3,7 +3,7 @@
     <svg class="cur-svg" :width="width" :height="height">
       <line
         v-for="path in otherShips"
-        :key="path.word"
+        :key="Math.random() * Math.random()"
         class="svg-line"
         :x1="path.source.x"
         :y1="path.source.y"
@@ -22,14 +22,14 @@
       />
       <circle
         v-for="node in otherNodes"
-        :key="node.word"
+        :key="Math.random() * Math.random()"
         class="svg-circle"
         :cx="node.x"
         :cy="node.y"
         :r="40 - node.degree * 7"
         :fill="`#${38 + node.degree * 20}f`"
       />
-      <text v-for="node in nodes" :key="node.index" :x="node.x" :y="node.y">{{ node.word }}</text>
+      <text v-for="node in nodes" :key="node.uuid" :x="node.x" :y="node.y">{{ node.word }}</text>
     </svg>
   </div>
 </template>
@@ -55,13 +55,13 @@ export default {
     this.width = document.querySelector('.app-main').clientWidth
     this.height = document.querySelector('.app-main').clientHeight
 
-    const { node, relationship } = data.data
+    const { nodes, ships } = data.data
+    console.log(nodes, ships)
+    initNodes.call(this, nodes, ships)
+    this.$store.commit('updateNodes', nodes)
 
-    initNodes.call(this, node, relationship)
-    this.$store.commit('updateNodes', node)
-
-    this.nodes = node
-    this.ships = relationship
+    this.nodes = nodes
+    this.ships = ships
 
     this.currentNode = this.nodes[1] // 索引结点
     let degree = 1
@@ -72,7 +72,7 @@ export default {
       const newNodes = []
       degree++
       ships.forEach(s => {
-        if (s.source.index === currentNode.index) {
+        if (s.source.uuid === currentNode.uuid) {
           s.target.degree = degree
           newNodes.push(s.target)
           this.otherNodes.push(s.target)
@@ -99,10 +99,10 @@ export default {
   flex: 1;
 }
 .svg-circle{
-  z-index: 99;
+
 }
 .svg-line {
-  z-index: 1;
+
 }
 </style>
 

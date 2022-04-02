@@ -16,9 +16,9 @@ const state = {
   GraphMode: 'normal',
   card: {
     word: 'word',
-    subject: '科目',
-    abstract: '简介',
-    interLink: '链接'
+    Infobox: '科目',
+    Abstract: '简介',
+    Direcoty_Context: '链接'
   }
 }
 

@@ -14,7 +14,7 @@
       <el-radio v-model="searchMode" label="normal" border>Normal</el-radio>
     </div>
 
-    <el-tag v-for="node in nodesList" :key="node.uuid" class="etag" :data-word="node.word"  @click="putIn">{{ node.word }}</el-tag>
+    <el-tag v-for="node in nodesList" :key="node.uuid" class="etag" :data-uuid="node.uuid" :data-word="node.word" @click="putIn">{{ node.word }}</el-tag>
 
   </div>
 </template>
@@ -30,7 +30,8 @@ export default {
       searchMode: 'curiosity',
       filterText: '',
       nodesList: [
-      ]
+      ],
+      selectNode: null
     }
   },
   mounted() {
@@ -42,16 +43,15 @@ export default {
   methods: {
     putIn: function(e) {
       this.filterText = e.target.dataset.word
+      this.selectId = e.target.dataset.uuid
     },
     search: function() {
       if ((this.filterText).trim() === '') return
+      const id = this.selectId
 
-      this.updateCard({
-        word: this.filterText,
-        subject: '科目',
-        abstract: '简介',
-        interLink: '链接'
-      })
+      this.updateCard(this.nodesList.find(i => {
+        return i.uuid === id
+      }))
     },
     toGraph() {
       this.changeMode(this.searchMode).then(
